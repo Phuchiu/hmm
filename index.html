@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<title>Đếm ngày xa em</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="jszip.min.js"></script>
+<style>
+:root{--bg:#0b0b0d;--card:#16161a;--card2:#1e1e24;--line:#2a2a31;--tx:#f3f3f4;--mu:#8d8d97;--ac:#e0566f;--ac2:#f19aab;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;height:100%;background:radial-gradient(120% 60% at 50% 0%,#1d1418 0%,var(--bg) 60%);background-color:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#app{max-width:480px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 18px 24px;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+nav{display:flex;border-top:1px solid var(--line);background:rgba(11,11,13,.92);backdrop-filter:blur(10px)}
+nav button{flex:1;min-height:56px;background:none;border:0;color:var(--mu);font:inherit;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+nav button span{font-size:20px;filter:grayscale(1);opacity:.7}
+nav button.on{color:var(--ac2)}nav button.on span{filter:none;opacity:1}
+h2{font-size:13px;letter-spacing:.2em;color:var(--mu);font-weight:600;margin:0}
+h3{margin:0 0 14px;font-size:17px}
+.hero{text-align:center;padding:38px 0 30px}
+.k{font-size:13px;letter-spacing:.35em;color:var(--ac2);text-transform:uppercase}
+.big{font-size:clamp(96px,32vw,150px);font-weight:200;line-height:1.05;margin:6px 0 0;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff,#b9a3a8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.u{font-size:20px;color:var(--mu);letter-spacing:.1em}
+.s{margin-top:14px;font-size:14px;color:var(--mu)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:14px}
+.center{text-align:center}
+.num{font-size:52px;font-weight:300;font-variant-numeric:tabular-nums;margin:4px 0 0}
+.btn,.ghost,.danger{min-height:48px;border-radius:16px;font:inherit;font-size:15px;font-weight:600;padding:0 18px;cursor:pointer;border:1px solid transparent;width:100%}
+.btn{background:linear-gradient(135deg,var(--ac),#b23a56);color:#fff;margin-top:14px}
+.btn:active{transform:scale(.98)}
+.ghost{background:var(--card2);border-color:var(--line);color:var(--tx);margin-top:10px}
+.danger{background:transparent;border-color:#5a2632;color:#ff7d92;margin-top:10px}
+.sm{width:auto;min-height:44px;margin:0;padding:0 16px;font-size:14px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;min-height:44px}
+.item{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:10px;cursor:pointer;min-height:64px}
+.item:active{background:var(--card2)}
+.ico{font-size:28px;width:48px;height:48px;border-radius:16px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex:none}
+.item .t{font-weight:600;overflow-wrap:anywhere}.item .m{font-size:13px;color:var(--mu);margin-top:2px}
+.item .d{margin-left:auto;text-align:right;font-size:12px;color:var(--ac2);flex:none}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.grid div{aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--card2);cursor:pointer}
+.grid img{width:100%;height:100%;object-fit:cover;display:block}
+.empty{text-align:center;color:var(--mu);padding:50px 20px;line-height:1.6;font-size:14px}
+.empty b{display:block;font-size:34px;margin-bottom:8px;font-weight:400}
+.set{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;background:var(--card);border:1px solid var(--line);border-radius:16px;color:var(--tx);font:inherit;font-size:15px;padding:0 16px;margin-bottom:8px;cursor:pointer;text-align:left}
+.set small{margin-left:auto;color:var(--mu);font-size:12px}
+.set.red{color:#ff7d92;border-color:#4a2530}
+.lbl{margin:18px 4px 8px;font-size:12px;letter-spacing:.15em;color:var(--mu)}
+#ov{position:absolute;inset:0;background:var(--bg);z-index:20;overflow-y:auto;padding:18px;animation:slide .3s ease;display:none}
+#ov.on{display:block}
+@keyframes slide{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.back{background:none;border:0;color:var(--mu);font:inherit;min-height:44px;padding:0;cursor:pointer;font-size:15px}
+.dt{text-align:center;padding:14px 0 22px}
+.dt .ico{margin:0 auto 12px;width:64px;height:64px;font-size:34px}
+.dt h1{font-size:20px;letter-spacing:.06em;margin:0;text-transform:uppercase;overflow-wrap:anywhere}
+.dt .n{font-size:38px;font-weight:200;color:var(--ac2);margin:10px 0 4px}
+.dt p{color:var(--mu);margin:8px 0 0;line-height:1.55;overflow-wrap:anywhere}
+#vw{position:fixed;inset:0;background:#000;z-index:30;display:none;flex-direction:column;animation:fade .25s}
+#vw.on{display:flex}
+#vw .top{display:flex;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 8px}
+#vw .top button{background:rgba(255,255,255,.1);border:0;color:#fff;min-height:44px;min-width:44px;border-radius:14px;font:inherit;cursor:pointer;padding:0 14px}
+#vw img{flex:1;min-height:0;width:100%;object-fit:contain}
+#vw .cap{padding:14px 18px calc(18px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,#000 40%);font-size:14px;line-height:1.5}
+#vw .cap b{display:block;font-size:16px}#vw .cap small{color:var(--mu)}
+#vw .cap a{color:var(--ac2);cursor:pointer;display:inline-block;min-height:32px}
+#sh{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none;align-items:flex-end;justify-content:center}
+#sh.on{display:flex;animation:fade .2s}
+#sh>div{width:100%;max-width:480px;max-height:92%;overflow-y:auto;background:var(--card);border-radius:26px 26px 0 0;border:1px solid var(--line);padding:22px 18px calc(22px + env(safe-area-inset-bottom,0px));animation:up .28s ease}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+label{display:block;font-size:12px;color:var(--mu);margin:14px 2px 6px;letter-spacing:.06em}
+input,textarea,select{width:100%;min-height:48px;background:var(--bg);border:1px solid var(--line);border-radius:14px;color:var(--tx);font:inherit;font-size:16px;padding:12px 14px;color-scheme:dark}
+textarea{min-height:84px;resize:vertical}
+.icons{display:flex;flex-wrap:wrap;gap:8px}
+.ic{width:48px;height:48px;font-size:24px;border-radius:14px;background:var(--bg);border:1px solid var(--line);cursor:pointer}
+.ic.on{border-color:var(--ac);background:#2a171d}
+.msg{line-height:1.6;margin:0 0 16px}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#26262d;border:1px solid var(--line);padding:12px 18px;border-radius:14px;font-size:14px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s;max-width:88%;text-align:center}
+#toast.on{opacity:1}
+.heart{position:fixed;z-index:50;pointer-events:none;font-size:26px;animation:fly 1.3s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),-170px) scale(1.3);opacity:0}}
+.pop{animation:pop .3s ease}
+@keyframes pop{50%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="main"></main>
+  <nav id="nav">
+    <button data-v="home"><span>🏠</span>Trang chủ</button>
+    <button data-v="mem"><span>❤️</span>Kỷ niệm</button>
+    <button data-v="album"><span>📷</span>Album</button>
+    <button data-v="set"><span>⚙️</span>Cài đặt</button>
+  </nav>
+  <div id="ov"></div>
+</div>
+<div id="vw"></div>
+<div id="sh"></div>
+<div id="toast" role="status"></div>
+<input type="file" id="zipin" accept=".zip,application/zip,application/x-zip-compressed" hidden>
+<input type="file" id="imgin" accept="image/*" multiple hidden>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const ICONS=['❤️','🎂','💌','🌹','📸','✨','🌙','🎁','✈️','☕'];
+const APP='dem-ngay-xa-em';
+
+/* ---------- Ngày (theo lịch, không phụ thuộc múi giờ) ---------- */
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const dnum=s=>{const [y,m,d]=s.split('-').map(Number);return Date.UTC(y,m-1,d)/864e5};
+const isDate=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&new Date(dnum(s)*864e5).toISOString().slice(0,10)===s;
+const isPast=s=>isDate(s)&&dnum(s)<=dnum(todayStr());
+const fmt=s=>{const [y,m,d]=s.split('-');return d+'/'+m+'/'+y};
+const since=s=>dnum(todayStr())-dnum(s);
+
+/* ---------- Lưu trữ cục bộ (IndexedDB) ---------- */
+let db=null,mem={};
+function openDB(){return new Promise(r=>{try{const q=indexedDB.open('dem-ngay-xa-em',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})}
+const kvGet=k=>new Promise(r=>{if(!db)return r(mem[k]);try{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r()}catch(e){r()}});
+const kvPut=(k,v)=>new Promise((r,j)=>{if(!db){mem[k]=v;return r()}const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=r;t.onerror=t.onabort=()=>j(t.error)});
+const kvDel=k=>new Promise((r,j)=>{if(!db){delete mem[k];return r()}const t=db.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=r;t.onerror=t.onabort=()=>j(t.error)});
+/* thay toàn bộ trong MỘT transaction: lỗi giữa chừng => tự rollback, dữ liệu cũ còn nguyên */
+const kvReplace=e=>new Promise((r,j)=>{if(!db){mem={};e.forEach(([k,v])=>mem[k]=v);return r()}const t=db.transaction('kv','readwrite');const s=t.objectStore('kv');s.clear();e.forEach(([k,v])=>s.put(v,k));t.oncomplete=r;t.onerror=t.onabort=()=>j(t.error||new Error('abort'))});
+
+const defaults=()=>({start:isPast('2026-09-01')?'2026-09-01':todayStr(),count:0,name:'Em',memories:[],photos:[]});
+let S=defaults(),view='home',urls={},lastDay=todayStr();
+const save=()=>kvPut('data',S).catch(()=>toast('Không lưu được dữ liệu, hãy sao lưu sớm'));
+
+/* ---------- UI helpers ---------- */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+let onCancel=null;
+function sheet(h,cancel){$('#sh').innerHTML='<div>'+h+'</div>';$('#sh').classList.add('on');onCancel=cancel||null}
+function closeSheet(){$('#sh').classList.remove('on');$('#sh').innerHTML='';const c=onCancel;onCancel=null;if(c)c()}
+$('#sh').addEventListener('click',e=>{if(e.target.id==='sh')closeSheet()});
+function ask(msg,ok){return new Promise(r=>{let done=false;const fin=v=>{if(!done){done=true;r(v)}};sheet('<p class="msg">'+msg+'</p><div class="row"><button class="ghost" id="n">Hủy</button><button class="btn" id="y" style="margin-top:10px">'+ok+'</button></div>',()=>fin(false));$('#n').onclick=()=>closeSheet();$('#y').onclick=()=>{onCancel=null;closeSheet();fin(true)}})}
+function hydrate(root){root.querySelectorAll('img[data-i]').forEach(async im=>{const id=im.dataset.i;if(!urls[id]){const b=await kvGet('img_'+id);if(b)urls[id]=URL.createObjectURL(b)}if(urls[id])im.src=urls[id]})}
+const nm=()=>S.name||'Em';
+const memOf=id=>S.memories.find(m=>m.id===id);
+const photosOf=id=>S.photos.filter(p=>p.mem===id).sort((a,b)=>a.date<b.date?1:-1);
+const thumbs=l=>l.length?'<div class="grid">'+l.map(p=>'<div data-a="openph" data-id="'+p.id+'"><img data-i="'+p.id+'" alt="'+esc(p.title)+'"></div>').join('')+'</div>':'';
+const dayText=d=>d===0?'Hôm nay':'Đã '+d+' ngày';
+
+/* ---------- Các màn hình ---------- */
+function render(){
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===view));
+  const m=$('#main');let h='';
+  if(view==='home'){
+    h='<section class="hero"><div class="k">Đã xa '+esc(nm())+'</div><div class="big" id="days">'+Math.max(0,since(S.start))+'</div><div class="u">ngày</div><div class="s">Kể từ ngày '+fmt(S.start)+'</div></section>'
+     +'<div class="card center"><h2>Số lần nhớ '+esc(nm().toLowerCase())+'</h2><div class="num" id="cnt">'+S.count+'</div><div class="s" style="margin:0">lần</div>'
+     +'<button class="btn" data-a="miss">+ NHỚ '+esc(nm().toUpperCase())+' ❤️</button><button class="ghost" data-a="resetc">Đặt lại số lần nhớ</button></div>'
+     +'<button class="ghost" data-a="chstart">Thay đổi ngày bắt đầu</button>';
+  }else if(view==='mem'){
+    const l=[...S.memories].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+    h='<div class="head"><h2>KỶ NIỆM</h2><button class="btn sm" data-a="addmem">+ Thêm</button></div>'
+     +(l.length?l.map(x=>'<div class="item" data-a="openmem" data-id="'+x.id+'"><div class="ico">'+esc(x.icon)+'</div><div style="min-width:0"><div class="t">'+esc(x.title)+'</div><div class="m">'+fmt(x.date)+'</div></div><div class="d">'+dayText(since(x.date))+(photosOf(x.id).length?'<br>📷 '+photosOf(x.id).length:'')+'</div></div>').join('')
+       :'<div class="empty"><b>🕊️</b>Chưa có kỷ niệm nào.<br>Hãy lưu lại ngày đầu tiên của hai người.</div>');
+  }else if(view==='album'){
+    const l=[...S.photos].sort((a,b)=>a.date<b.date?1:-1);
+    h='<div class="head"><h2>ALBUM CỦA CHÚNG TA</h2><button class="btn sm" data-a="addphoto">+ Thêm ảnh</button></div>'
+     +(l.length?thumbs(l):'<div class="empty"><b>📷</b>Album còn trống.<br>Thêm những bức ảnh bạn muốn giữ lại.</div>');
+  }else{
+    h='<div class="head"><h2>CÀI ĐẶT</h2></div>'
+     +'<button class="set" data-a="chstart">📅 Thay đổi ngày bắt đầu<small>'+fmt(S.start)+'</small></button>'
+     +'<button class="set" data-a="rename">✏️ Đổi tên hiển thị<small>'+esc(nm())+'</small></button>'
+     +'<div class="lbl">QUẢN LÝ DỮ LIỆU</div>'
+     +'<button class="set" data-a="resetc">🔄 Reset số lần nhớ<small>'+S.count+'</small></button>'
+     +'<button class="set" data-a="backup">💾 Sao lưu dữ liệu<small>.zip</small></button>'
+     +'<button class="set" data-a="restore">📥 Khôi phục dữ liệu</button>'
+     +'<button class="set red" data-a="wipe">🗑️ Xóa toàn bộ dữ liệu</button>'
+     +'<p class="empty" style="padding:20px 10px">Mọi dữ liệu chỉ lưu trên thiết bị này.<br>'+S.memories.length+' kỷ niệm · '+S.photos.length+' ảnh</p>';
+  }
+  m.style.animation='none';void m.offsetWidth;m.style.animation='';
+  m.innerHTML=h;hydrate(m);
+}
+function openMem(id){
+  const x=memOf(id);if(!x)return closeOv();
+  const ov=$('#ov');
+  ov.innerHTML='<button class="back" data-a="back">← Quay lại</button><div class="dt"><div class="ico">'+esc(x.icon)+'</div><h1>'+esc(x.title)+'</h1><div class="s">'+fmt(x.date)+'</div><div class="n">'+dayText(since(x.date))+'</div>'+(x.desc?'<p>“'+esc(x.desc)+'”</p>':'')+'</div>'
+   +thumbs(photosOf(id))+'<button class="btn" data-a="addphoto" data-id="'+id+'">+ Thêm ảnh</button><button class="ghost" data-a="editmem" data-id="'+id+'">Chỉnh sửa</button><button class="danger" data-a="delmem" data-id="'+id+'">Xóa kỷ niệm</button>';
+  ov.classList.add('on');ov.dataset.mem=id;hydrate(ov);
+}
+function closeOv(){const o=$('#ov');o.classList.remove('on');o.innerHTML='';delete o.dataset.mem}
+const refresh=()=>{render();const id=$('#ov').dataset.mem;if(id)openMem(id)};
+
+function openPh(id){
+  const p=S.photos.find(x=>x.id===id);if(!p)return;const k=p.mem&&memOf(p.mem);
+  $('#vw').innerHTML='<div class="top"><button data-a="closeph">✕ Đóng</button><span><button data-a="editph" data-id="'+id+'">Sửa</button> <button data-a="delph" data-id="'+id+'">🗑️</button></span></div><img data-i="'+id+'" alt="'+esc(p.title)+'"><div class="cap"><b>'+esc(p.title||'Không có tiêu đề')+'</b><small>'+fmt(p.date)+'</small>'+(p.caption?'<div>'+esc(p.caption)+'</div>':'')+(k?'<a data-a="gomem" data-id="'+k.id+'">'+esc(k.icon)+' '+esc(k.title)+'</a>':'')+'</div>';
+  $('#vw').classList.add('on');hydrate($('#vw'));
+}
+const closePh=()=>{$('#vw').classList.remove('on');$('#vw').innerHTML=''};
+
+/* ---------- Form ---------- */
+let selIcon='❤️';
+function memForm(id){
+  const m=memOf(id)||{icon:'❤️',date:'',title:'',desc:''};selIcon=m.icon;
+  sheet('<h3>'+(id?'Sửa kỷ niệm':'Thêm kỷ niệm')+'</h3><div class="icons">'+ICONS.map(i=>'<button type="button" class="ic'+(i===m.icon?' on':'')+'" data-a="pick" data-ic="'+i+'">'+i+'</button>').join('')+'</div>'
+   +'<label>Tên kỷ niệm</label><input id="f_t" maxlength="80" value="'+esc(m.title)+'" placeholder="Ngày chúng ta gặp nhau">'
+   +'<label>Ngày</label><input type="date" id="f_d" max="'+todayStr()+'" value="'+m.date+'">'
+   +'<label>Mô tả ngắn (tuỳ chọn)</label><textarea id="f_s" maxlength="500">'+esc(m.desc)+'</textarea>'
+   +'<div class="row"><button class="ghost" data-a="close">Hủy</button><button class="btn" data-a="savemem" data-id="'+(id||'')+'">Lưu</button></div>');
+}
+const memOpts=sel=>'<option value="">— Không liên kết —</option>'+[...S.memories].sort((a,b)=>a.date<b.date?-1:1).map(m=>'<option value="'+m.id+'"'+(m.id===sel?' selected':'')+'>'+esc(m.icon+' '+m.title)+'</option>').join('');
+function photoForm(id,memId){
+  const p=S.photos.find(x=>x.id===id)||{title:'',caption:'',date:todayStr(),mem:memId||''};
+  sheet('<h3>'+(id?'Sửa ảnh':'Thêm ảnh')+'</h3>'
+   +(id?'':'<button class="ghost" style="margin-top:0" data-a="pickfiles">📁 Chọn ảnh từ thư viện</button><div class="s" id="picked" style="margin:8px 2px 0;font-size:13px">Chưa chọn ảnh nào</div>')
+   +'<label>Ngày</label><input type="date" id="p_d" max="'+todayStr()+'" value="'+p.date+'">'
+   +'<label>Tiêu đề</label><input id="p_t" maxlength="80" value="'+esc(p.title)+'">'
+   +'<label>Chú thích</label><textarea id="p_c" maxlength="500">'+esc(p.caption)+'</textarea>'
+   +'<label>Kỷ niệm liên quan (tuỳ chọn)</label><select id="p_m">'+memOpts(p.mem)+'</select>'
+   +'<div class="row"><button class="ghost" data-a="close">Hủy</button><button class="btn" data-a="savephoto" data-id="'+(id||'')+'">Lưu</button></div>');
+}
+let files=[];
+async function shrink(f){
+  let bm;try{bm=await createImageBitmap(f)}catch(e){bm=await new Promise((r,j)=>{const i=new Image();i.onload=()=>r(i);i.onerror=j;i.src=URL.createObjectURL(f)})}
+  const w=bm.width||bm.naturalWidth,h=bm.height||bm.naturalHeight,k=Math.min(1,1600/Math.max(w,h));
+  const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
+  const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,c.width,c.height);x.drawImage(bm,0,0,c.width,c.height);
+  return new Promise((r,j)=>c.toBlob(b=>b?r(b):j(new Error('img')),'image/jpeg',.86));
+}
+
+/* ---------- Sao lưu / Khôi phục ---------- */
+async function backup(){
+  try{
+    toast('Đang tạo file sao lưu…');
+    if(typeof JSZip==='undefined')throw new Error('zip');
+    const z=new JSZip(),photos=[];let n=0;
+    for(const p of S.photos){const b=await kvGet('img_'+p.id);if(!b)continue;n++;const f='images/image'+String(n).padStart(3,'0')+'.jpg';z.file(f,b);photos.push({...p,file:f})}
+    z.file('data.json',JSON.stringify({app:APP,version:1,exportedAt:new Date().toISOString(),startDate:S.start,missCount:S.count,displayName:S.name,memories:S.memories,photos},null,2));
+    const blob=await z.generateAsync({type:'blob',compression:'DEFLATE'});
+    const cap=window.Capacitor;
+    if(cap&&cap.isNativePlatform&&cap.isNativePlatform()){
+      const b64=await new Promise((r,j)=>{const f=new FileReader();f.onload=()=>r(String(f.result).split(',')[1]);f.onerror=j;f.readAsDataURL(blob)});
+      const {Filesystem,Share}=cap.Plugins;
+      const w=await Filesystem.writeFile({path:'dem-ngay-xa-em-backup.zip',data:b64,directory:'CACHE'});
+      await Share.share({title:'Sao lưu Đếm ngày xa em',url:w.uri,dialogTitle:'Lưu file sao lưu'});
+      return toast('Đã tạo file sao lưu ❤️');
+    }
+    const dl=window.claude?await window.claude.use('downloads'):null;
+    if(dl){await dl.save({filename:'dem-ngay-xa-em-backup.zip',data:blob});toast('Đã tạo file sao lưu ❤️')}
+    else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dem-ngay-xa-em-backup.zip';document.body.appendChild(a);a.click();a.remove();toast('Đã tạo file sao lưu ❤️')}
+  }catch(e){toast(e&&e.code==='declined'?'Đã hủy lưu file':'Sao lưu thất bại, vui lòng thử lại')}
+}
+async function restore(file){
+  let S2,imgs;
+  try{
+    if(typeof JSZip==='undefined')throw 0;
+    const z=await JSZip.loadAsync(file),jf=z.file('data.json');if(!jf)throw 0;
+    const d=JSON.parse(await jf.async('string'));
+    if(d.app!==APP||!isPast(d.startDate)||!Number.isInteger(d.missCount)||d.missCount<0||!Array.isArray(d.memories)||!Array.isArray(d.photos))throw 0;
+    const ids=new Set();
+    const memories=d.memories.map(m=>{if(!m||!m.id||!m.title||!isDate(m.date))throw 0;ids.add(m.id);return{id:String(m.id),title:String(m.title),date:m.date,desc:String(m.desc||''),icon:String(m.icon||'❤️')}});
+    imgs=[];const photos=[];
+    for(const p of d.photos){
+      const f=p&&p.id&&typeof p.file==='string'?z.file(p.file):null;if(!f||!isDate(p.date))throw 0;
+      imgs.push(['img_'+p.id,new Blob([await f.async('arraybuffer')],{type:'image/jpeg'})]);
+      photos.push({id:String(p.id),date:p.date,title:String(p.title||''),caption:String(p.caption||''),mem:ids.has(p.mem)?p.mem:''});
+    }
+    S2={start:d.startDate,count:d.missCount,name:String(d.displayName||'Em').slice(0,30),memories,photos};
+  }catch(e){toast('File sao lưu không hợp lệ. Dữ liệu hiện tại không bị thay đổi.');return}
+  if(!await ask('Khôi phục dữ liệu sẽ thay thế dữ liệu hiện tại. Bạn có chắc chắn không?','Khôi phục'))return;
+  try{
+    await kvReplace([['data',S2],...imgs]);
+    Object.values(urls).forEach(u=>URL.revokeObjectURL(u));urls={};S=S2;closeOv();view='home';render();toast('Đã khôi phục dữ liệu thành công ❤️');
+  }catch(e){toast('Khôi phục thất bại. Dữ liệu hiện tại được giữ nguyên.')}
+}
+
+/* ---------- Hành động ---------- */
+function heart(btn){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const r=btn.getBoundingClientRect();
+  for(let i=0;i<3;i++){const h=document.createElement('span');h.className='heart';h.textContent=['❤️','💗','🤍'][i%3];h.style.left=(r.left+r.width/2-13+(Math.random()*60-30))+'px';h.style.top=(r.top-4)+'px';h.style.setProperty('--dx',(Math.random()*80-40)+'px');h.style.animationDelay=(i*.12)+'s';document.body.appendChild(h);setTimeout(()=>h.remove(),1600)}
+}
+const A={
+  close:()=>closeSheet(),back:()=>closeOv(),closeph:()=>closePh(),
+  miss(_,b){S.count++;save();const c=$('#cnt');c.textContent=S.count;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');heart(b)},
+  async resetc(){if(await ask('Đặt lại số lần nhớ về 0?','Đặt lại')){S.count=0;await save();refresh();toast('Đã đặt lại số lần nhớ')}},
+  chstart(){sheet('<h3>Ngày bắt đầu xa nhau</h3><label>Chọn ngày (không được ở tương lai)</label><input type="date" id="f_st" max="'+todayStr()+'" value="'+S.start+'"><div class="row" style="margin-top:16px"><button class="ghost" data-a="close">Hủy</button><button class="btn" data-a="savestart">Lưu</button></div>')},
+  async savestart(){const v=$('#f_st').value;if(!isPast(v))return toast('Hãy chọn một ngày hợp lệ, không phải ngày tương lai');S.start=v;await save();closeSheet();refresh();toast('Đã cập nhật ngày bắt đầu')},
+  rename(){sheet('<h3>Đổi tên hiển thị</h3><label>Tên (mặc định: Em)</label><input id="f_n" maxlength="30" value="'+esc(S.name)+'"><div class="row" style="margin-top:16px"><button class="ghost" data-a="close">Hủy</button><button class="btn" data-a="saverename">Lưu</button></div>')},
+  async saverename(){S.name=$('#f_n').value.trim()||'Em';await save();closeSheet();refresh()},
+  addmem:()=>memForm(''),editmem:(id)=>memForm(id),
+  pick(_,b){selIcon=b.dataset.ic;document.querySelectorAll('.ic').forEach(x=>x.classList.toggle('on',x===b))},
+  async savemem(id){
+    const t=$('#f_t').value.trim(),d=$('#f_d').value,s=$('#f_s').value.trim();
+    if(!t)return toast('Hãy nhập tên kỷ niệm');
+    if(!isPast(d))return toast('Hãy chọn ngày trong quá khứ hoặc hôm nay');
+    if(id){Object.assign(memOf(id),{title:t,date:d,desc:s,icon:selIcon})}else S.memories.push({id:uid(),title:t,date:d,desc:s,icon:selIcon});
+    await save();closeSheet();refresh();toast('Đã lưu kỷ niệm ❤️');
+  },
+  openmem:(id)=>openMem(id),
+  async delmem(id){if(!await ask('Xóa kỷ niệm này? Ảnh liên quan vẫn được giữ trong album.','Xóa'))return;S.memories=S.memories.filter(m=>m.id!==id);S.photos.forEach(p=>{if(p.mem===id)p.mem=''});await save();closeOv();render();toast('Đã xóa kỷ niệm')},
+  addphoto(id){files=[];photoForm('',id||'')},
+  pickfiles(){$('#imgin').click()},
+  async savephoto(id){
+    const d=$('#p_d').value,t=$('#p_t').value.trim(),c=$('#p_c').value.trim(),m=$('#p_m').value;
+    if(!isPast(d))return toast('Hãy chọn ngày hợp lệ');
+    if(id){Object.assign(S.photos.find(p=>p.id===id),{date:d,title:t,caption:c,mem:m});await save();closeSheet();refresh();if($('#vw').classList.contains('on'))openPh(id);return toast('Đã cập nhật ảnh')}
+    if(!files.length)return toast('Hãy chọn ít nhất một ảnh');
+    const btn=document.querySelector('[data-a=savephoto]');btn.disabled=true;btn.textContent='Đang lưu…';
+    let ok=0;
+    for(const f of files){try{const b=await shrink(f),pid=uid();await kvPut('img_'+pid,b);S.photos.push({id:pid,date:d,title:t,caption:c,mem:m});ok++}catch(e){}}
+    await save();closeSheet();refresh();toast(ok===files.length?'Đã thêm '+ok+' ảnh':'Thêm được '+ok+'/'+files.length+' ảnh');files=[];
+  },
+  openph:(id)=>openPh(id),
+  editph(id){photoForm(id)},
+  async delph(id){if(!await ask('Xóa ảnh này khỏi album?','Xóa'))return;S.photos=S.photos.filter(p=>p.id!==id);await kvDel('img_'+id).catch(()=>{});if(urls[id]){URL.revokeObjectURL(urls[id]);delete urls[id]}await save();closePh();refresh();toast('Đã xóa ảnh')},
+  gomem(id){closePh();openMem(id)},
+  backup,
+  restore(){$('#zipin').value='';$('#zipin').click()},
+  async wipe(){
+    if(!await ask('Xóa TOÀN BỘ kỷ niệm, ảnh và số lần nhớ khỏi thiết bị này? Hành động này không thể hoàn tác. Bạn nên sao lưu trước.','Xóa tất cả'))return;
+    try{await kvReplace([['data',defaults()]]);Object.values(urls).forEach(u=>URL.revokeObjectURL(u));urls={};S=defaults();closeOv();render();toast('Đã xóa toàn bộ dữ liệu')}catch(e){toast('Không xóa được dữ liệu')}
+  }
+};
+document.addEventListener('click',e=>{
+  const n=e.target.closest('#nav button');if(n){view=n.dataset.v;closeOv();render();return}
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const f=A[b.dataset.a];if(f)f(b.dataset.id,b);
+});
+$('#zipin').addEventListener('change',e=>{const f=e.target.files[0];if(f)restore(f)});
+$('#imgin').addEventListener('change',e=>{files=[...e.target.files];const p=$('#picked');if(p)p.textContent=files.length?'Đã chọn '+files.length+' ảnh':'Chưa chọn ảnh nào';e.target.value=''});
+
+/* ---------- Khởi động ---------- */
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)&&!window.Capacitor)navigator.serviceWorker.register('sw.js').catch(()=>{});
+(async()=>{
+  await openDB();
+  const d=await kvGet('data');
+  if(d&&isDate(d.start)&&Array.isArray(d.memories)&&Array.isArray(d.photos))S=Object.assign(defaults(),d);
+  render();
+  setInterval(()=>{const t=todayStr();if(t!==lastDay){lastDay=t;refresh()}},30000);
+  document.addEventListener('visibilitychange',()=>{const t=todayStr();if(t!==lastDay){lastDay=t;refresh()}});
+})();
+</script>
+</body>
+</html>
